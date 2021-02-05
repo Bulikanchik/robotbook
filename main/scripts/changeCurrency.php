@@ -1,0 +1,120 @@
+<?php
+session_start();
+include $_SERVER['DOCUMENT_ROOT'].'/connects.php';
+
+
+$ERROR = '';
+
+if(isset($_POST['first'])){
+    $current_numb = 0;
+    session_unset();
+    $_SESSION['numbers'] = $_POST['numbers'];
+    $_SESSION['currency'] = $_POST['currency'];
+    $_SESSION['current_numb'] = "0";
+}
+else {
+    $_SESSION['current_numb']  = (int)($_SESSION['current_numb']) + 1;
+    $current_numb = (int)$_SESSION['current_numb'];
+}
+
+
+
+if($current_numb == count($_SESSION['numbers'])) {
+    print_r(json_encode($_SESSION));
+    session_unset();
+    exit();
+}
+else {   
+    $queryRk = $link->query("SELECT * FROM Rk_Id WHERE rk_id='".$_SESSION['numbers'][$current_numb]."'");
+    $rowRk = mysqli_fetch_array($queryRk, MYSQLI_ASSOC);
+    
+    $query = $link->query("SELECT * FROM Tokenbase WHERE access_token='".$rowRk['access_token']."'");
+    $row = mysqli_fetch_array($query, MYSQLI_ASSOC);
+    
+    
+    $access_token = $row['access_token'];
+    if($row['user_agent'] != '')
+        $user_agent = $row['user_agent'];
+    if($row['proxy'] != ''){
+        $proxy = explode("//", explode("@", $row['proxy'])[0])[1];
+        $login_password = explode("@", $row['proxy'])[1];
+    }
+
+
+
+    if((time() - strval($row['reftime'])) > 1800) {
+        $url = "https://graph.facebook.com/v7.0/me/?access_token=".$access_token;
+        
+        
+        
+        include($_SERVER['DOCUMENT_ROOT']."/get.php");
+        
+        if($output->error) {
+            $ERROR = $output->error->message;
+            $_SESSION['error'][$current_numb] = $output->error->error_subcode;
+            if($output->error->error_subcode == '459') {
+                $queryUp = $link->query("UPDATE Rk_Id SET state='ERROR' WHERE access_token='".$access_token."'");
+                $queryUp = $link->query("UPDATE Tokenbase SET state='Selfy' WHERE access_token='".$access_token."'");
+            }
+            else if($output->error->error_subcode == '452'){
+                $queryUp = $link->query("UPDATE Rk_Id SET state='ERROR' WHERE access_token='".$access_token."'");
+                $queryUp = $link->query("UPDATE Tokenbase SET state='Check Passwd' WHERE access_token='".$access_token."'");
+            }
+        }
+        else
+            $firstoutput = $output;
+    }
+   
+    $queryUp = $link->query("UPDATE Tokenbase SET reftime='".strval(time())."' WHERE access_token='".$access_token."'"); 
+    
+    if($ERROR == '') {
+    
+        $url = "https://graph.facebook.com/v7.0/".$rowRk['rk_id'];
+        $post_data = array(
+		"access_token" => $row['access_token'],
+		"currency" => $_SESSION['currency']);
+        
+        
+        include($_SERVER['DOCUMENT_ROOT']."/post.php");
+        if(is_null($output)) 
+            include($_SERVER['DOCUMENT_ROOT']."/post.php");
+    
+        if($output->error) {
+            $ERROR = $output->error->message;
+            $_SESSION['error'][$current_numb] = $output->error->error_subcode;
+            if($output->error->error_subcode == '459') {
+                $queryUp = $link->query("UPDATE Rk_Id SET state='ERROR' WHERE access_token='".$access_token."'");
+                $queryUp = $link->query("UPDATE Tokenbase SET state='Selfy' WHERE access_token='".$access_token."'");
+            }
+            else if($output->error->error_subcode == '452'){
+                $queryUp = $link->query("UPDATE Rk_Id SET state='ERROR' WHERE access_token='".$access_token."'");
+                $queryUp = $link->query("UPDATE Tokenbase SET state='Check Passwd' WHERE access_token='".$access_token."'");
+            }
+            else if($output->error->error_subcode == '1885316'){
+                $queryUp = $link->query("UPDATE Rk_Id SET state='ERROR' WHERE access_token='".$access_token."'");
+            }
+            else 
+                $_SESSION['fatalError'] = $output->error->error_user_title." ".$output->error->error_user_msg;
+           
+        }
+            
+        if($output->success) 
+            $queryUp = $link->query("UPDATE Rk_Id SET currency = '".$_SESSION['currency']."' WHERE rk_id = '".$rowRk['rk_id']."'");
+        else 
+            $queryUp = $link->query("UPDATE Rk_Id SET state = 'ERROR' WHERE rk_id = '".$rowRk['rk_id']."'");
+        
+    }
+    
+    $log = "CHANGE CURRENCY ".date("H:i:m d:m:Y")."\n".json_encode($_SESSION)."\n".date("H:i:m d:m:Y", $row['reftime'])."\n".json_encode($firstoutput)."\n".json_encode($output)."\n\n\n";
+    file_put_contents($_SERVER['DOCUMENT_ROOT']."/logs.txt", $log, FILE_APPEND);
+    
+    
+    $_SESSION['firstoutput'][$current_numb] = $firstoutput;
+    $_SESSION['output'][$current_numb] = $output;
+    print_r(json_encode($_SESSION));
+    session_unset();
+    exit();
+    //header('Location: changeCurrency.php');
+}
+
+?>

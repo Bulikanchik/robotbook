@@ -1,0 +1,141 @@
+.success {
+    width: 400px;
+}
+.error {
+    width: 400px;
+}
+.warning {
+    width: 400px;
+}
+
+.addGroupForm {
+    max-width: 300px;
+}
+
+.addProxyForm {
+    max-width: 500px;
+}
+
+.mainSettings {
+    height: 85px;
+    padding: 10% 0%;
+}
+
+.select2-selection--multiple {
+    overflow-y: scroll; 
+    height: 45px;
+}
+
+textarea {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.checkbox-column{
+    width: 10%;
+}
+
+.account_state{
+    width: 10%;
+}
+
+.account_action{
+    width: 10%;
+}
+
+.accounts_action > .btn-group{
+    width: 40% !important;
+}
+
+form {
+    background: #fff;
+}
+
+.nav-link.active {
+    color: #1461CC !important;
+}
+
+.ad_info {
+    width: 20%;
+}
+
+.ad_state{
+    width: 10%;
+}
+
+.addfpForm {
+    max-width: 300px;
+}
+
+.changeCurrencyForm {
+    max-width: 250px;
+}
+
+.addCardForm {
+    max-width: 900px;
+}
+
+
+
+
+.devices {
+    width: 270px;
+}
+
+
+table {
+    width: 100%; /* Ширина таблицы */
+   }
+ 
+tr {
+    text-align: center;
+}
+
+   
+.template_form {
+    float: left; 
+    width: 230px; 
+    margin: 0px 20px;
+}
+.template_form11 {
+    word-break:break-all;
+    /*width: 350px;*/ 
+    margin: 0px 30px;
+}
+.template_form111 {
+    float: right; 
+    /*width: 350px;*/ 
+    margin: 0px 30px;
+}
+
+.template_form1 {
+    float: left; 
+    width: 280px; 
+    margin: 0px 5px;
+}
+
+.template_form2 {
+    float: left; 
+    width: 350px; 
+    margin: 0px 30px;
+}
+
+.template_form0 {
+    float: left; 
+    width: 260px; 
+    margin: 0px 10px;
+}
+
+.template_form3 {
+    float: left; 
+    width: 260px; 
+    margin: 0px 10px;
+}
+
+
+.card_form {
+    float: left; 
+    width: 350px; 
+    margin: 0px 20px;
+}
